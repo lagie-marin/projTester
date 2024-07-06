@@ -1,0 +1,50 @@
+#!/bin/bash
+## Create at Marin Lagié
+
+NC='\033[0m'
+GREEN='\e[1;32m'
+RED='\e[1;31m'
+debug=$1
+
+if [ ! -f "../projTester" ]; then
+    echo -ne $RED
+    echo -e "You must compile your code$NC"
+    exit 84
+fi
+
+get_result() {
+    num_test=$1
+    cmd=$2
+    sort_bin=$3
+    sort_nor=$4
+
+    diff_output=$(diff sortie1.txt sortie2.txt)
+    if [ -z "$diff_output" ] && [ "$sort_bin" == "$sort_nor" ]; then
+        echo -e "TEST[$num_test]: $cmd $GREEN OK $NC"
+    else
+        echo -e "TEST[$num_test]: $cmd $RED KO $NC"
+        if [ "$debug" == "-debug" ]; then
+            echo -e "\nSortie obtenue :\n"
+            cat sortie2.txt
+
+            echo -e "\nSortie attendue :\n"
+            cat sortie1.txt
+        fi
+    fi
+}
+
+create_test() {
+    num_test=$1
+    args=$2
+    result="$3"
+    cmd="../projTester $args"
+    echo -ne "$result" > sortie1.txt
+    sort_nor=$4
+    eval "../projTester $args" > sortie2.txt
+    sort_bin=$?
+    get_result $num_test "$cmd" "$sort_bin" "$sort_nor"
+}
+#create_test id "param" "result" error_value
+#Test ciblé
+create_test 1 "falcon" "" 84
+create_test 2 "../adda/ echo" "" 84
